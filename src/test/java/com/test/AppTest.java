@@ -11,7 +11,7 @@ import io.restassured.RestAssured;
 public class AppTest {
     private RequestSpecification request;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
 	public void createRequestSpecification() {
 		request = RestAssured.given();
 		request.baseUri("https://reqres.in");
