@@ -27,7 +27,7 @@ public class ReqresTest extends Setup {
                 .statusCode(200);
     }
 
-    @Test(groups = { "p1" })
+    @Test(groups = { "p0" })
     public void createNewEmployee() {
         User employee = new User("Indra", "QA");
 
@@ -41,6 +41,6 @@ public class ReqresTest extends Setup {
                                     .extract().response();
         
         String id = response.getBody().jsonPath().get("id");
-        // Assert.assertEquals(response.body()., 0, 0, null);
+        Assert.assertNotNull(id, "ID should be returned");
     }
 }
