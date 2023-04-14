@@ -4,7 +4,7 @@
   <test name="Testing">  
       <groups>  
          <run>  
-            <include name="p0"/>  
+            <include name="p1"/>  
          </run>  
       </groups> 
       <packages>
