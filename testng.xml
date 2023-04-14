@@ -4,11 +4,11 @@
   <test name="Testing">  
       <groups>  
          <run>  
-            <include name="p1"/>  
+            <include name="p0"/>  
          </run>  
       </groups> 
-      <classes>  
-         <class name="com.test.AppTest"/>  
-      </classes>  
+      <packages>
+        <package name="com.test.*" />
+      </packages>
    </test>
 </suite>

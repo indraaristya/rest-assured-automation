@@ -17,7 +17,7 @@ public class AppTest {
 		request.baseUri("https://reqres.in");
 	}
 
-    @Test(groups = { "p0" })
+    @Test(groups = { "p1" })
     public void getAllEmployee() {
         request
             .when()
@@ -26,7 +26,7 @@ public class AppTest {
                 .statusCode(200);
     }
 
-    @Test(groups = { "p0" })
+    @Test(groups = { "p1" })
     public void getEmployeeDetails() {
         request
             .when()
