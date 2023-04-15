@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 public class OrderService {
     private List<Order> orderArray = new ArrayList<>();
 
-    public Order createNewOrder(OrderRequest order) {
+    public int createNewOrder(OrderRequest order) {
         Order newOrder = new Order();
         newOrder.setId(order.getOrderId());
         newOrder.setDescription(order.getDesc());
@@ -18,6 +18,10 @@ public class OrderService {
 
         orderArray.add(newOrder);
 
-        return newOrder;
+        return 1;
+    }
+
+    public List<Order> getAllOrder() {
+        return this.orderArray;
     }
 }
