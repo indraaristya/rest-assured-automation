@@ -72,6 +72,8 @@ Before started to explain the approach, for clear use-case I applied some assump
 
 5. Order should be submitted with status **New**, and the response will be update the status value into **Processing**
 
+6. Since the API is not hosted or created, I will mock the response using *WireMock*
+
 ### Approach on Solving Problems
 
 The automation tools is using Rest Assured and ran using TestNG. Rest Assured is one of Java library that capable of doing request and validate the response to be tested. In this code, the automation combined using TestNG to run (that's why `testng.xml` file exist and mentioned in configuration `pom.xml`).
@@ -99,3 +101,6 @@ Based on the assumptions above and scenario testing, I will need order object wi
 To improve these code, we are able to review the API requirements to create readable framework and easy to use. This improvement also included to apply more reliable design patter if needed.
 
 The code also able to Dockerize so it will be able to used in any platform or OS. This dockerize automation also helps us on running the automation in cloud node.
+### Report Sample
+
+![Emailable Report Sample](https://i.ibb.co/WPT73yd/Screen-Shot-2023-04-16-at-00-10-38.png)

@@ -1,7 +1,7 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
 
-<suite name="test_suite" thread-count="1" parallel="methods">   
-  <test name="Testing">  
+<suite name="Test Suite 1" thread-count="1" parallel="methods">   
+  <test name="Test Submit /processOrder">  
       <groups>  
          <run>  
             <include name="order_test"/>  
