@@ -1,5 +1,7 @@
 package data;
 
+import com.github.javafaker.Faker;
+
 public class Order {
     private int order_id;
     private String order_desccription;
@@ -62,10 +64,17 @@ public class Order {
         private Boolean special_order;
         private Long last_updated_timestamp;
 
-        public OrderBuilder(int id, String desc, Boolean special) {
+        Faker faker = Faker.instance();
+
+        public OrderBuilder(int id) {
             this.order_id = id;
+            this.order_desccription = faker.lorem().sentence(10, 0);
+            this.special_order = faker.bool().bool();
+        }
+
+        public OrderBuilder setDescription(String desc) {
             this.order_desccription = desc;
-            this.special_order = special;
+            return this;
         }
 
         public OrderBuilder setOrderStatus(String status) {

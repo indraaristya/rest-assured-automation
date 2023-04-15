@@ -52,14 +52,11 @@ public class OrderTest {
     @Test(groups = { "order_test" })
     public void successCreateOrderWithValidData() throws JsonProcessingException {
         // Mock request and response
-        int order_id = 1;
-        String description = "Order untuk Indra";
-        Boolean special_order = true;
-
-        Order dataResponse = new Order.OrderBuilder(order_id, description, special_order)
-                            .setOrderStatus("Processing")
-                            .setTimeStamp(System.currentTimeMillis() / 1000)
-                            .build();
+        int id = 10;
+        Order dataResponse = new Order.OrderBuilder(id)
+                                .setOrderStatus("Processing")
+                                .setTimeStamp(System.currentTimeMillis() / 1000)
+                                .build();
 
         APIResponse mockResponse = new APIResponse.ResponseBuilder("success", "Success add new order!")
                                     .setResponseData(dataResponse).build();
@@ -70,10 +67,11 @@ public class OrderTest {
                 .withBody(objectMapper.writeValueAsString(mockResponse))));
         
         // Testing request
-        Order newOrder = new Order.OrderBuilder(order_id, description, special_order)
-                        .setOrderStatus("New Order")
-                        .setTimeStamp(System.currentTimeMillis() / 1000)
-                        .build();
+        Order newOrder = new Order.OrderBuilder(id)
+                            .setDescription(dataResponse.getOrder_desccription())
+                            .setOrderStatus("New Order")
+                            .setTimeStamp(System.currentTimeMillis() / 1000)
+                            .build();
 
         Response response = RestAssured
                             .given()
@@ -97,8 +95,6 @@ public class OrderTest {
     public void failedCreateOrderWithoutStatus() throws JsonProcessingException {
         // Mock request and response
         int order_id = 10;
-        String description = "Order tanpa status";
-        Boolean special_order = true;
         
         APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Failed create order. Status should be defined.")
                                     .build();
@@ -108,7 +104,7 @@ public class OrderTest {
                 .withBody(objectMapper.writeValueAsString(mockResponse))));
         
         // Testing request
-        Order newOrder = new Order.OrderBuilder(order_id, description, special_order)
+        Order newOrder = new Order.OrderBuilder(order_id)
                         .setTimeStamp(System.currentTimeMillis() / 1000)
                         .build();
 
@@ -131,8 +127,6 @@ public class OrderTest {
     public void failedCreateOrderWithoutTimestamp() throws JsonProcessingException {
         // Mock request and response
         int order_id = 10;
-        String description = "Order tanpa timestamp";
-        Boolean special_order = true;
         
         APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Failed create order. Timestamp should be defined.")
                                     .build();
@@ -143,7 +137,7 @@ public class OrderTest {
                 .withBody(objectMapper.writeValueAsString(mockResponse))));
         
         // Testing request
-        Order newOrder = new Order.OrderBuilder(order_id, description, special_order)
+        Order newOrder = new Order.OrderBuilder(order_id)
                         .setOrderStatus("New")
                         .build();
 
@@ -192,18 +186,16 @@ public class OrderTest {
     public void failedCreateOrderWithInvalidStatus() throws JsonProcessingException {
         // Mock request and response
         int order_id = 10;
-        String description = "Order invalid status";
-        Boolean special_order = true;
         
         APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Failed create order. Status should be one of New, Processing, or Done.").build();
-        
+
         stubFor(post(urlEqualTo(PATH)).willReturn(
             aResponse().withStatus(400)
                 .withHeader("Content-Type", APPLICATION_JSON)
                 .withBody(objectMapper.writeValueAsString(mockResponse))));
         
         // Testing request
-        Order newOrder = new Order.OrderBuilder(order_id, description, special_order)
+        Order newOrder = new Order.OrderBuilder(order_id)
                         .setTimeStamp(System.currentTimeMillis() / 1000)
                         .setOrderStatus(getInvalidStatus())
                         .build();
