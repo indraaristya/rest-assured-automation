@@ -50,7 +50,7 @@ public class OrderTest extends SetupMock {
         // Testing request
         Order newOrder = new Order.OrderBuilder(id)
                             .setDescription(dataResponse.getOrder_desccription())
-                            .setOrderStatus("New Order")
+                            .setOrderStatus("New")
                             .setTimeStamp()
                             .build();
 
