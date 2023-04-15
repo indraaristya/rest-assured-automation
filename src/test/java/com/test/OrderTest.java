@@ -22,7 +22,7 @@ import java.util.Random;
 import java.util.Arrays;
 
 public class OrderTest extends SetupMock {
-    private static final String PATH = "/order";
+    private static final String PATH = "/processOrder";
     private static final String APPLICATION_JSON = "application/json";
 
     @MockBean
@@ -58,7 +58,7 @@ public class OrderTest extends SetupMock {
                             .given()
                                 .body(newOrder).log().all()
                             .when()
-                                .post("/order")
+                                .post(PATH)
                             .then()
                                 .statusCode(201).log().all()
                                 .extract().response();
@@ -94,7 +94,7 @@ public class OrderTest extends SetupMock {
                             .given()
                                 .body(newOrder).log().all()
                             .when()
-                                .post("/order")
+                                .post(PATH)
                             .then()
                                 .statusCode(400).log().all()
                                 .extract().response();
@@ -127,7 +127,7 @@ public class OrderTest extends SetupMock {
                             .given()
                                 .body(newOrder).log().all()
                             .when()
-                                .post("/order")
+                                .post(PATH)
                             .then()
                                 .statusCode(400).log().all()
                                 .extract().response();
@@ -153,7 +153,7 @@ public class OrderTest extends SetupMock {
         Response response = RestAssured
                             .given()
                             .when()
-                                .post("/order")
+                                .post(PATH)
                             .then()
                                 .statusCode(400).log().all()
                                 .extract().response();
@@ -186,7 +186,7 @@ public class OrderTest extends SetupMock {
                             .given()
                                 .body(newOrder).log().all()
                             .when()
-                                .post("/order")
+                                .post(PATH)
                             .then()
                                 .statusCode(400).log().all()
                                 .extract().response();
@@ -219,7 +219,7 @@ public class OrderTest extends SetupMock {
                             .given()
                                 .body(newOrder).log().all()
                             .when()
-                                .post("/order")
+                                .post(PATH)
                             .then()
                                 .statusCode(400).log().all()
                                 .extract().response();
