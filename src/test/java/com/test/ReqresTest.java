@@ -28,8 +28,8 @@ public class ReqresTest extends Setup {
     }
 
     @Test(groups = { "p0" })
-    public void createNewEmployee() {
-        User employee = new User("Indra", "QA");
+    public void createNewEmployeeWithJob() {
+        User employee = new User.UserBuilder("Indra").setUserAge(24).setUserJob("QA").build();
 
         Response response = getRequest()
                                 .log().all()
@@ -42,5 +42,21 @@ public class ReqresTest extends Setup {
         
         String id = response.getBody().jsonPath().get("id");
         Assert.assertNotNull(id, "ID should be returned");
+    }
+
+    @Test(groups = { "p0" })
+    public void createNewEmployeeWithoutJob() {
+        User employee = new User.UserBuilder("Dia").build();
+
+        Response response = getRequest()
+                                .log().all()
+                                .with()
+                                    .body(employee)
+                                .when()
+                                    .post("/api/users")
+                                .then()
+                                    .extract().response();
+        String name = response.getBody().jsonPath().get("name");
+        Assert.assertNotNull(name, "name should be returned");
     }
 }
