@@ -1,6 +1,6 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
 
-<suite name="test_suite">   
+<suite name="test_suite" thread-count="1" parallel="methods">   
   <test name="Testing">  
       <groups>  
          <run>  
