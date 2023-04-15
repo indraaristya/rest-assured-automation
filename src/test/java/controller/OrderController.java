@@ -24,7 +24,7 @@ public class OrderController {
         UriComponentsBuilder uriComponentsBuilder
     ) {
         int order = service.createNewOrder(orderReq);
-        UriComponents uriComponents = uriComponentsBuilder.path("/api/order/{id}").buildAndExpand(order);
+        UriComponents uriComponents = uriComponentsBuilder.path("/order").buildAndExpand(order);
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(uriComponents.toUri());
 

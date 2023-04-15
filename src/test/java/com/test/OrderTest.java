@@ -24,7 +24,7 @@ import io.restassured.response.ResponseBody;
 
 public class OrderTest {
     private static WireMockServer wireMockServer;
-    private static final String EVENTS_PATH = "/order";
+    private static final String PATH = "/order";
     private static final String APPLICATION_JSON = "application/json";
 
     @MockBean
@@ -33,20 +33,12 @@ public class OrderTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeMethod(alwaysRun = true)
-    public void setUp() throws JsonProcessingException {
-        Order newOrder = new Order.OrderBuilder(1, "Coba", true)
-                            .setOrderStatus("Processing")
-                            .setTimeStamp(System.currentTimeMillis() / 1000)
-                            .build();
+    public void setUp() {
         final int port = 8009;
         wireMockServer = new WireMockServer(port);
         wireMockServer.start();
         configureFor("localhost", port);
         RestAssured.port = port;
-        stubFor(post(urlEqualTo(EVENTS_PATH)).willReturn(
-          aResponse().withStatus(201)
-            .withHeader("Content-Type", APPLICATION_JSON)
-            .withBody(objectMapper.writeValueAsString(newOrder))));
     }
 
     @AfterMethod(alwaysRun = true)
@@ -54,9 +46,28 @@ public class OrderTest {
         wireMockServer.stop();
     }
 
-    @Test(groups = {"p3"})
-    public void successCreateOrderWithValidData() {
-        Order newOrder = new Order.OrderBuilder(1, "Coba", true)
+    @Test(groups = { "order_test" })
+    public void successCreateOrderWithValidData() throws JsonProcessingException {
+        // Mock request and response
+        int order_id = 1;
+        String description = "Order untuk Indra";
+        Boolean special_order = true;
+
+        Order dataResponse = new Order.OrderBuilder(order_id, description, special_order)
+                            .setOrderStatus("Processing")
+                            .setTimeStamp(System.currentTimeMillis() / 1000)
+                            .build();
+
+        APIResponse mockResponse = new APIResponse.ResponseBuilder("success", "Success add new order!")
+                                    .setResponseData(dataResponse).build();
+        
+        stubFor(post(urlEqualTo(PATH)).willReturn(
+            aResponse().withStatus(201)
+                .withHeader("Content-Type", APPLICATION_JSON)
+                .withBody(objectMapper.writeValueAsString(mockResponse))));
+        
+        // Testing request
+        Order newOrder = new Order.OrderBuilder(order_id, description, special_order)
                         .setOrderStatus("New Order")
                         .setTimeStamp(System.currentTimeMillis() / 1000)
                         .build();
@@ -70,10 +81,108 @@ public class OrderTest {
                                 .statusCode(201).log().all()
                                 .extract().response();
                                 
-        // String id = response.getBody().jsonPath().get("id");
         ResponseBody body = response.getBody();
-        Assert.assertNotNull(body.jsonPath().get("order_id"), "ID should be returned");
-        Assert.assertEquals(body.jsonPath().get("order_status"), "Processing");
+        Assert.assertEquals(body.jsonPath().get("status"), "success");
+        Assert.assertEquals(body.jsonPath().get("message"), "Success add new order!");
+        Assert.assertEquals(body.jsonPath().get("data.order_id"), dataResponse.getOrder_id());
+        Assert.assertEquals(body.jsonPath().get("data.order_status"), "Processing");
+        Assert.assertEquals(body.jsonPath().get("data.order_desccription"), dataResponse.getOrder_desccription());
+        Assert.assertEquals(body.jsonPath().get("data.special_order"), dataResponse.getSpecial_order());
+    }
+
+    @Test(groups = { "order_test" })
+    public void failedCreateOrderWithoutStatus() throws JsonProcessingException {
+        // Mock request and response
+        int order_id = 10;
+        String description = "Order tanpa status";
+        Boolean special_order = true;
+        
+        APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Failed create order. Status should be defined.")
+                                    .build();
+        stubFor(post(urlEqualTo(PATH)).willReturn(
+            aResponse().withStatus(400)
+                .withHeader("Content-Type", APPLICATION_JSON)
+                .withBody(objectMapper.writeValueAsString(mockResponse))));
+        
+        // Testing request
+        Order newOrder = new Order.OrderBuilder(order_id, description, special_order)
+                        .setTimeStamp(System.currentTimeMillis() / 1000)
+                        .build();
+
+        Response response = RestAssured
+                            .given()
+                                .body(newOrder).log().all()
+                            .when()
+                                .post("/order")
+                            .then()
+                                .statusCode(400).log().all()
+                                .extract().response();
+        
+        ResponseBody body = response.getBody();
+        Assert.assertEquals(body.jsonPath().get("status"), "error");
+        Assert.assertEquals(body.jsonPath().get("message"), "Failed create order. Status should be defined.");
+        Assert.assertNull(body.jsonPath().get("data"), "Data should return null");
+    }
+
+    @Test(groups = { "order_test" })
+    public void failedCreateOrderWithoutTimestamp() throws JsonProcessingException {
+        // Mock request and response
+        int order_id = 10;
+        String description = "Order tanpa timestamp";
+        Boolean special_order = true;
+        
+        APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Failed create order. Timestamp should be defined.")
+                                    .build();
+
+        stubFor(post(urlEqualTo(PATH)).willReturn(
+            aResponse().withStatus(400)
+                .withHeader("Content-Type", APPLICATION_JSON)
+                .withBody(objectMapper.writeValueAsString(mockResponse))));
+        
+        // Testing request
+        Order newOrder = new Order.OrderBuilder(order_id, description, special_order)
+                        .setOrderStatus("New")
+                        .build();
+
+        Response response = RestAssured
+                            .given()
+                                .body(newOrder).log().all()
+                            .when()
+                                .post("/order")
+                            .then()
+                                .statusCode(400).log().all()
+                                .extract().response();
+        
+        ResponseBody body = response.getBody();
+        Assert.assertEquals(body.jsonPath().get("status"), "error");
+        Assert.assertEquals(body.jsonPath().get("message"), "Failed create order. Timestamp should be defined.");
+        Assert.assertNull(body.jsonPath().get("data"), "Data should return null");
+    }
+
+    @Test(groups = { "order_test" })
+    public void failedCreateOrderWithoutBody() throws JsonProcessingException {
+        // Mock request and response
+        APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Body request should be defined.")
+                                    .build();
+
+        stubFor(post(urlEqualTo(PATH)).willReturn(
+            aResponse().withStatus(400)
+                .withHeader("Content-Type", APPLICATION_JSON)
+                .withBody(objectMapper.writeValueAsString(mockResponse))));
+        
+        // Testing request
+        Response response = RestAssured
+                            .given()
+                            .when()
+                                .post("/order")
+                            .then()
+                                .statusCode(400).log().all()
+                                .extract().response();
+        
+        ResponseBody body = response.getBody();
+        Assert.assertEquals(body.jsonPath().get("status"), "error");
+        Assert.assertEquals(body.jsonPath().get("message"), "Body request should be defined.");
+        Assert.assertNull(body.jsonPath().get("data"), "Data should return null");
     }
     
 }
