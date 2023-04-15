@@ -55,7 +55,7 @@ public class OrderTest {
         int id = 10;
         Order dataResponse = new Order.OrderBuilder(id)
                                 .setOrderStatus("Processing")
-                                .setTimeStamp(System.currentTimeMillis() / 1000)
+                                .setTimeStamp()
                                 .build();
 
         APIResponse mockResponse = new APIResponse.ResponseBuilder("success", "Success add new order!")
@@ -70,7 +70,7 @@ public class OrderTest {
         Order newOrder = new Order.OrderBuilder(id)
                             .setDescription(dataResponse.getOrder_desccription())
                             .setOrderStatus("New Order")
-                            .setTimeStamp(System.currentTimeMillis() / 1000)
+                            .setTimeStamp()
                             .build();
 
         Response response = RestAssured
@@ -98,6 +98,7 @@ public class OrderTest {
         
         APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Failed create order. Status should be defined.")
                                     .build();
+
         stubFor(post(urlEqualTo(PATH)).willReturn(
             aResponse().withStatus(400)
                 .withHeader("Content-Type", APPLICATION_JSON)
@@ -105,8 +106,8 @@ public class OrderTest {
         
         // Testing request
         Order newOrder = new Order.OrderBuilder(order_id)
-                        .setTimeStamp(System.currentTimeMillis() / 1000)
-                        .build();
+                            .setTimeStamp()
+                            .build();
 
         Response response = RestAssured
                             .given()
@@ -138,8 +139,8 @@ public class OrderTest {
         
         // Testing request
         Order newOrder = new Order.OrderBuilder(order_id)
-                        .setOrderStatus("New")
-                        .build();
+                            .setOrderStatus("New")
+                            .build();
 
         Response response = RestAssured
                             .given()
@@ -196,9 +197,9 @@ public class OrderTest {
         
         // Testing request
         Order newOrder = new Order.OrderBuilder(order_id)
-                        .setTimeStamp(System.currentTimeMillis() / 1000)
-                        .setOrderStatus(getInvalidStatus())
-                        .build();
+                            .setTimeStamp()
+                            .setOrderStatus(getInvalidStatus())
+                            .build();
 
         Response response = RestAssured
                             .given()
@@ -215,6 +216,40 @@ public class OrderTest {
         Assert.assertNull(body.jsonPath().get("data"), "Data should return null");
     }
 
+    @Test(groups = { "order_test" })
+    public void failedCreateOrderWithInvalidTimestamp() throws JsonProcessingException {
+        // Mock request and response
+        int order_id = 10;
+        
+        APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Failed create order. Updated time is not valid unix timestamp").build();
+
+        stubFor(post(urlEqualTo(PATH)).willReturn(
+            aResponse().withStatus(400)
+                .withHeader("Content-Type", APPLICATION_JSON)
+                .withBody(objectMapper.writeValueAsString(mockResponse))));
+        
+        // Testing request
+        Order newOrder = new Order.OrderBuilder(order_id)
+                            .setTimeStamp("invalid")
+                            .setOrderStatus("New")
+                            .build();
+
+        Response response = RestAssured
+                            .given()
+                                .body(newOrder).log().all()
+                            .when()
+                                .post("/order")
+                            .then()
+                                .statusCode(400).log().all()
+                                .extract().response();
+        
+        ResponseBody body = response.getBody();
+        Assert.assertEquals(body.jsonPath().get("status"), "error");
+        Assert.assertEquals(body.jsonPath().get("message"), "Failed create order. Updated time is not valid unix timestamp");
+        Assert.assertNull(body.jsonPath().get("data"), "Data should return null");
+    }
+
+    // function to get one of invalid status
     public String getInvalidStatus() {
         List<String> invalidStatus = Arrays.asList("Baru", "Invalid", "Order baru");
         Random rand = new Random();

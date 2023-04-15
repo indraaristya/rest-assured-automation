@@ -7,7 +7,7 @@ public class Order {
     private String order_desccription;
     private String order_status;
     private Boolean special_order;
-    private Long last_updated_timestamp;
+    private String last_updated_timestamp;
 
     public int getOrder_id() {
         return order_id;
@@ -41,11 +41,11 @@ public class Order {
         this.special_order = special_order;
     }
 
-    public Long getLast_updated_timestamp() {
+    public String getLast_updated_timestamp() {
         return this.last_updated_timestamp;
     }
 
-    public void setLast_updated_timestamp(Long time) {
+    public void setLast_updated_timestamp(String time) {
         this.last_updated_timestamp = time;
     }
 
@@ -62,7 +62,7 @@ public class Order {
         private String order_desccription;
         private String order_status;
         private Boolean special_order;
-        private Long last_updated_timestamp;
+        private String last_updated_timestamp;
 
         Faker faker = Faker.instance();
 
@@ -82,8 +82,14 @@ public class Order {
             return this;
         }
 
-        public OrderBuilder setTimeStamp(Long time) {
+        public OrderBuilder setTimeStamp(String time) {
             this.last_updated_timestamp = time;
+            return this;
+        }
+
+        //@Overloading
+        public OrderBuilder setTimeStamp() {
+            this.last_updated_timestamp = Long.toString(System.currentTimeMillis() / 1000);
             return this;
         }
 
