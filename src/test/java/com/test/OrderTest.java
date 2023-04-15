@@ -8,8 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.github.tomakehurst.wiremock.WireMockServer;
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.post;
+
 import org.mockito.Mockito;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -17,18 +30,29 @@ import static org.mockito.Mockito.mock;
 import java.util.List;
 import java.util.ArrayList;
 
-@WebMvcTest(OrderController.class)
 public class OrderTest {
+    private static WireMockServer wireMockServer;
+    private static final String EVENTS_PATH = "/employees";
+    private static final String APPLICATION_JSON = "application/json";
 
     @MockBean
     private OrderService service;
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebApplicationContext mockMvc;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        RestAssuredMockMvc.mockMvc(mockMvc);
+        // RestAssuredMockMvc.webAppContextSetup(mockMvc);
+        final int port = 8009;
+        wireMockServer = new WireMockServer(port);
+        wireMockServer.start();
+        configureFor("localhost", port);
+        RestAssured.port = port;
+        stubFor(post(urlEqualTo(EVENTS_PATH)).willReturn(
+          aResponse().withStatus(200)
+            .withHeader("Content-Type", APPLICATION_JSON)));
+            // .withBody(EMPLOYEES)));
     }
 
     @Test(groups = {"p3"})
@@ -41,12 +65,13 @@ public class OrderTest {
 
         Order newOrder = new Order.OrderBuilder(1, "Coba", "New", true, "10101").build();
         
-        RestAssuredMockMvc
+        // RestAssuredMockMvc.standaloneSetup(new OrderController(this.service));
+        RestAssured
             .given()
                 .body(newOrder).log().all()
             .when()
-                .post("/order");
-            // .then()
+                .post("/order")
+            .then().log().all();
                 // .statusCode(201).log().all();
                 
     }
