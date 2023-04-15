@@ -21,6 +21,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
+import java.util.List;
+import java.util.Random;
+import java.util.Arrays;
 
 public class OrderTest {
     private static WireMockServer wireMockServer;
@@ -185,4 +188,46 @@ public class OrderTest {
         Assert.assertNull(body.jsonPath().get("data"), "Data should return null");
     }
     
+    @Test(groups = { "order_test" })
+    public void failedCreateOrderWithInvalidStatus() throws JsonProcessingException {
+        // Mock request and response
+        int order_id = 10;
+        String description = "Order invalid status";
+        Boolean special_order = true;
+        
+        APIResponse mockResponse = new APIResponse.ResponseBuilder("error", "Failed create order. Status should be one of New, Processing, or Done.").build();
+        
+        stubFor(post(urlEqualTo(PATH)).willReturn(
+            aResponse().withStatus(400)
+                .withHeader("Content-Type", APPLICATION_JSON)
+                .withBody(objectMapper.writeValueAsString(mockResponse))));
+        
+        // Testing request
+        Order newOrder = new Order.OrderBuilder(order_id, description, special_order)
+                        .setTimeStamp(System.currentTimeMillis() / 1000)
+                        .setOrderStatus(getInvalidStatus())
+                        .build();
+
+        Response response = RestAssured
+                            .given()
+                                .body(newOrder).log().all()
+                            .when()
+                                .post("/order")
+                            .then()
+                                .statusCode(400).log().all()
+                                .extract().response();
+        
+        ResponseBody body = response.getBody();
+        Assert.assertEquals(body.jsonPath().get("status"), "error");
+        Assert.assertEquals(body.jsonPath().get("message"), "Failed create order. Status should be one of New, Processing, or Done.");
+        Assert.assertNull(body.jsonPath().get("data"), "Data should return null");
+    }
+
+    public String getInvalidStatus() {
+        List<String> invalidStatus = Arrays.asList("Baru", "Invalid", "Order baru");
+        Random rand = new Random();
+        int randomElement = rand.nextInt(invalidStatus.size());
+        return invalidStatus.get(randomElement);
+    }
+
 }
