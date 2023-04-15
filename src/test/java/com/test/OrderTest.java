@@ -3,15 +3,11 @@ import controller.*;
 import data.Order;
 
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -25,8 +21,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Arrays;
 
-public class OrderTest {
-    private static WireMockServer wireMockServer;
+public class OrderTest extends SetupMock {
     private static final String PATH = "/order";
     private static final String APPLICATION_JSON = "application/json";
 
@@ -34,20 +29,6 @@ public class OrderTest {
     private OrderService service;
 
     private ObjectMapper objectMapper = new ObjectMapper();
-
-    @BeforeMethod(alwaysRun = true)
-    public void setUp() {
-        final int port = 8009;
-        wireMockServer = new WireMockServer(port);
-        wireMockServer.start();
-        configureFor("localhost", port);
-        RestAssured.port = port;
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void stopWiremock() {
-        wireMockServer.stop();
-    }
 
     @Test(groups = { "order_test" })
     public void successCreateOrderWithValidData() throws JsonProcessingException {
