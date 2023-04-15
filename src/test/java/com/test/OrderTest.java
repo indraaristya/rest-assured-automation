@@ -2,15 +2,13 @@ package com.test;
 import controller.*;
 import data.Order;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.web.context.WebApplicationContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
@@ -21,12 +19,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 
 import io.restassured.RestAssured;
-
-import org.mockito.Mockito;
-import static org.mockito.Mockito.mock;
-
-import java.util.List;
-import java.util.ArrayList;
+import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
 
 public class OrderTest {
     private static WireMockServer wireMockServer;
@@ -40,7 +34,10 @@ public class OrderTest {
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() throws JsonProcessingException {
-        Order newOrder = new Order.OrderBuilder(1, "Coba", "New", true, "10101").build();
+        Order newOrder = new Order.OrderBuilder(1, "Coba", true)
+                            .setOrderStatus("Processing")
+                            .setTimeStamp(System.currentTimeMillis() / 1000)
+                            .build();
         final int port = 8009;
         wireMockServer = new WireMockServer(port);
         wireMockServer.start();
@@ -59,20 +56,24 @@ public class OrderTest {
 
     @Test(groups = {"p3"})
     public void successCreateOrderWithValidData() {
-        // this.service = mock(OrderService.class);
-        // OrderRequest orderRequest = mock(OrderRequest.class);
-        // Mockito.doReturn(1).when(service).createNewOrder(orderRequest);
+        Order newOrder = new Order.OrderBuilder(1, "Coba", true)
+                        .setOrderStatus("New Order")
+                        .setTimeStamp(System.currentTimeMillis() / 1000)
+                        .build();
 
-        Order newOrder = new Order.OrderBuilder(1, "Coba", "New", true, "10101").build();
-
-        RestAssured
-            .given()
-                .body(newOrder).log().all()
-            .when()
-                .post("/order")
-            .then()
-                .statusCode(201).log().all();
-                
+        Response response = RestAssured
+                            .given()
+                                .body(newOrder).log().all()
+                            .when()
+                                .post("/order")
+                            .then()
+                                .statusCode(201).log().all()
+                                .extract().response();
+                                
+        // String id = response.getBody().jsonPath().get("id");
+        ResponseBody body = response.getBody();
+        Assert.assertNotNull(body.jsonPath().get("order_id"), "ID should be returned");
+        Assert.assertEquals(body.jsonPath().get("order_status"), "Processing");
     }
     
 }

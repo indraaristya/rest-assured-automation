@@ -62,12 +62,20 @@ public class Order {
         private Boolean special_order;
         private Long last_updated_timestamp;
 
-        public OrderBuilder(int id, String desc, String status, Boolean special, String timestamp) {
+        public OrderBuilder(int id, String desc, Boolean special) {
             this.order_id = id;
             this.order_desccription = desc;
-            this.order_status = status;
             this.special_order = special;
-            this.last_updated_timestamp = Long.parseLong(timestamp);
+        }
+
+        public OrderBuilder setOrderStatus(String status) {
+            this.order_status = status;
+            return this;
+        }
+
+        public OrderBuilder setTimeStamp(Long time) {
+            this.last_updated_timestamp = time;
+            return this;
         }
 
         public Order build() {
